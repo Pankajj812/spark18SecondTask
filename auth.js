@@ -4,22 +4,19 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-const fs = require("fs");
-const http = require('http');
 
 const { google } = require("googleapis");
 const gmail = google.gmail("v1");
 
 const { OAuth2Client } = require("google-auth-library");
-const { fstat } = require("fs");
 
 const SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"];
 
 const getAcessToken = async () => {
   //authentication
-  const clientSecret = "w1CoIJqJVHU8323rbAKhQozu";
+  const clientSecret = "<client secret>";
   const clientId =
-    "520246189983-s1p1a4onk05a6iek70jq3489cf43iset.apps.googleusercontent.com";
+    "<Client id>";
   const redirectUrl = "http://localhost:3000/code.html";
   const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUrl);
 
@@ -30,6 +27,8 @@ const getAcessToken = async () => {
   });
 
   console.log("Authorize this app ", authUrl);
+
+  //Prompt User to Enter code and subject
 
   rl.question("Enter code and Subject seperated by colon ", (input) => {
     let code = null;
@@ -52,6 +51,7 @@ const getAcessToken = async () => {
       oauth2Client.credentials = token;
       console.log("Token is ", token);
       //Once we get Access Token we can call gmail Apis to retrieve mails
+      //This will get message id of user 
       const response = await gmail.users.messages.list({
         auth: oauth2Client,
         userId: "me",
@@ -66,6 +66,7 @@ const getAcessToken = async () => {
         "id" in response.data.messages[0] &&
         response.data.messages[0].id
       ) {
+        //Get actual Message by id
         let message = await gmail.users.messages.get({
           auth: oauth2Client,
           userId: "me",
@@ -81,23 +82,12 @@ const getAcessToken = async () => {
           message.data.payload &&
           "body" in message.data.payload &&
           message.data.payload.body
+          && 'data' in message.data.payload.body &&  message.data.payload.body.data
         ) {
+          console.log(message.data.payload.body)
           let decoded = base64decode(message.data.payload.body.data);
+          //Resultant HTML Template of message
           console.log("Body", decoded);
-          //create index.html file and write decoded email text to html file
-          // let writeStream = fs.createWriteStream(__dirname/"message.html");
-          // writeStream.write(decoded);
-          // //Render HTML file in browser
-          // fs.readFile(__dirname/"message.html", function (err, html) {
-          //   if (err) throw err;
-          //   http
-          //     .createServer(function (request, response) {
-          //       response.writeHeader(200, { "Content-Type": "text/html" });
-          //       response.write(html);
-          //       response.end();
-          //     })
-          //     .listen(8080);
-          // });
         } else {
           console.log("Error in getting message");
         }
