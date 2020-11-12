@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Code</title>
+</head>
+<body onload="loadDoc()">
+
+<h1>Your Code is : <span id='code'></span></h1>
+<p>Please Note while you enter code in console code and subject should be seperated by colon</p>
+
+
+</body>
+</html>
+
+<script>
+
+    function loadDoc(){
+        let locationUrl = window.location.search
+        const urlParams = new URLSearchParams(locationUrl);
+        let code = urlParams.get('code');
+        document.getElementById('code').innerText = code;
+    }
+</script>
